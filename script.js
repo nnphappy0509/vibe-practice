@@ -1,17 +1,18 @@
+// 중3 역사(근현대사) 문제 데이터
 const quizData = [
     {
-        question: "1897년, 고종이 자주독립 국가임을 알리기 위해 환구단에서 황제로 즉위하며 선포한 나라의 이름은?",
-        options: ["조선", "대한민국", "대한제국", "고려"],
-        correct: 2
-    },
-    {
-        question: "1919년 3월 1일, 일제의 식민 통치에 항거하여 전국적으로 일어난 민족 해방 운동은?",
-        options: ["갑신정변", "3·1 운동", "동학 농민 운동", "6·10 만세 운동"],
+        question: "1876년, 조선이 외국과 맺은 최초의 근대적 조약이자 불평등 조약은 무엇인가요?",
+        options: ["을사늑약", "강화도 조약", "조미 수호 통상 조약", "제물포 조약"],
         correct: 1
     },
     {
-        question: "1940년 대한민국 임시 정부가 충칭에서 창설한 정규 군대의 이름은?",
-        options: ["조선의용대", "독립군", "대한독립군단", "한국광복군"],
+        question: "1919년 3월 1일, 민족 대표 33인의 독립 선언서 낭독과 함께 시작된 전국적인 만세 운동은?",
+        options: ["3·1 운동", "6·10 만세 운동", "광주 학생 항일 운동", "물산 장려 운동"],
+        correct: 0
+    },
+    {
+        question: "1945년 8월 15일, 우리 민족이 일제의 식민 통치에서 벗어나 국권을 되찾은 날을 기념하는 국경일은?",
+        options: ["제헌절", "개천절", "삼일절", "광복절"],
         correct: 3
     }
 ];
@@ -19,70 +20,81 @@ const quizData = [
 let currentQuestionIndex = 0;
 let score = 0;
 
-const questionEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const resultEl = document.getElementById('result');
-const quizEl = document.getElementById('quiz');
-const scoreEl = document.getElementById('score');
-const progressText = document.getElementById('progress-text');
+// 웹페이지가 완전히 로드된 후 스크립트 실행
+document.addEventListener("DOMContentLoaded", () => {
+    const questionEl = document.getElementById("question");
+    const optionsContainer = document.getElementById("options-container");
+    const resultContent = document.getElementById("result-content");
+    const quizContent = document.getElementById("quiz-content");
+    const scoreDisplay = document.getElementById("score-display");
+    const progressText = document.getElementById("progress-text");
+    const retryBtn = document.getElementById("retry-btn");
 
-function startQuiz() {
-    currentQuestionIndex = 0;
-    score = 0;
-    resultEl.classList.add('hidden');
-    quizEl.classList.remove('hidden');
-    loadQuestion();
-}
-
-function loadQuestion() {
-    const currentQuiz = quizData[currentQuestionIndex];
-    questionEl.innerText = currentQuiz.question;
-    optionsEl.innerHTML = '';
-    
-    currentQuiz.options.forEach((option, index) => {
-        const button = document.createElement('button');
-        button.innerText = option;
-        button.classList.add('option-btn');
-        button.addEventListener('click', () => selectAnswer(index, button));
-        optionsEl.appendChild(button);
-    });
-
-    progressText.innerText = `${currentQuestionIndex + 1} / ${quizData.length}`;
-}
-
-function selectAnswer(selectedIndex, selectedButton) {
-    const currentQuiz = quizData[currentQuestionIndex];
-    const buttons = document.querySelectorAll('.option-btn');
-    
-    // 버튼 클릭 비활성화
-    buttons.forEach(btn => btn.style.pointerEvents = 'none');
-
-    if (selectedIndex === currentQuiz.correct) {
-        selectedButton.classList.add('correct');
-        score++;
-    } else {
-        selectedButton.classList.add('wrong');
-        // 정답 버튼도 초록색으로 표시
-        buttons[currentQuiz.correct].classList.add('correct');
+    // 퀴즈 초기화 및 시작 함수
+    function initQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        resultContent.classList.add("hidden");
+        quizContent.classList.remove("hidden");
+        loadQuestion();
     }
 
-    // 1.5초 후 다음 문제로 넘어감
-    setTimeout(() => {
-        currentQuestionIndex++;
-        if (currentQuestionIndex < quizData.length) {
-            loadQuestion();
+    // 문제 불러오기 함수
+    function loadQuestion() {
+        optionsContainer.innerHTML = ""; // 이전 선택지 지우기
+        const currentQuiz = quizData[currentQuestionIndex];
+        
+        questionEl.innerText = currentQuiz.question;
+        progressText.innerText = `문제 ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+        currentQuiz.options.forEach((option, index) => {
+            const btn = document.createElement("button");
+            btn.innerText = option;
+            btn.classList.add("option-btn");
+            btn.addEventListener("click", () => handleAnswer(index, btn));
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    // 정답 확인 함수
+    function handleAnswer(selectedIndex, selectedBtn) {
+        const currentQuiz = quizData[currentQuestionIndex];
+        const allBtns = document.querySelectorAll(".option-btn");
+
+        // 한 번 클릭 후 다른 버튼 클릭 방지
+        allBtns.forEach(btn => btn.style.pointerEvents = "none");
+
+        if (selectedIndex === currentQuiz.correct) {
+            selectedBtn.classList.add("correct");
+            score++;
         } else {
-            showResult();
+            selectedBtn.classList.add("wrong");
+            // 오답일 경우 정답 버튼도 초록색으로 표시
+            allBtns[currentQuiz.correct].classList.add("correct");
         }
-    }, 1500);
-}
 
-function showResult() {
-    quizEl.classList.add('hidden');
-    resultEl.classList.remove('hidden');
-    scoreEl.innerText = `${quizData.length}문제 중 ${score}문제를 맞혔습니다!`;
-    progressText.innerText = "퀴즈 완료!";
-}
+        // 1.5초(1500ms) 대기 후 다음 문제로 이동
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }, 1500);
+    }
 
-// 퀴즈 시작
-startQuiz();
+    // 결과 화면 표시 함수
+    function showResult() {
+        quizContent.classList.add("hidden");
+        resultContent.classList.remove("hidden");
+        scoreDisplay.innerText = `총 ${quizData.length}문제 중 ${score}문제를 맞혔습니다!`;
+        progressText.innerText = "퀴즈 완료 🎉";
+    }
+
+    // 다시 풀기 버튼 이벤트 연결
+    retryBtn.addEventListener("click", initQuiz);
+
+    // 첫 문제 시작
+    initQuiz();
+});
